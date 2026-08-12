@@ -423,17 +423,22 @@ const JOURNEY = {
    =====================================================================
 */
 function getRoute(){
-  const path = location.pathname.replace(/\/+$/,'');
-  let match = path.match(/\/mom\/(\d+)$/);
-  if (match) return { type: 'step', n: parseInt(match[1], 10) };
+  // Subpath-agnostic: works whether the site is at the domain root
+  // (e.g. yoursite.com/) or a subfolder (e.g. drk.qzz.io/momjourney/).
+  const path = location.pathname.replace(/\/index\.html$/,'').replace(/\/+$/,'');
+
+  const stepMatch = path.match(/\/mom\/([^/]+)$/);
+  if (stepMatch) {
+    return /^\d+$/.test(stepMatch[1])
+      ? { type: 'step', n: parseInt(stepMatch[1], 10) }
+      : { type: 'notfound' };
+  }
 
   const hash = location.hash.match(/#\/?mom\/(\d+)$/);
   if (hash) return { type: 'step', n: parseInt(hash[1], 10) };
 
-  if (path === '' || path === '/' || path.endsWith('/index.html')) {
-    return { type: 'home' };
-  }
-  return { type: 'notfound' };
+  // Anything else (root, or the site's own base subfolder) is the homepage.
+  return { type: 'home' };
 }
 
 function stepUrl(n){
