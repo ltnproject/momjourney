@@ -10,17 +10,10 @@
     body {
       margin: 0;
       min-height: 100vh;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #FBF5EE;
       color: #4A3B36;
     }
@@ -41,80 +34,32 @@
   </style>
 
   <script>
-    /*
-     * =========================================================
-     * MOM'S LITTLE JOURNEY — 404 HANDLER
-     * =========================================================
-     *
-     * This file is used when someone opens a URL such as:
-     *
-     *   /momjourney/mom/1
-     *   /momjourney/mom/2
-     *   /momjourney/mom/3
-     *
-     * GitHub Pages doesn't know those routes exist, so it serves
-     * this 404.html instead.
-     *
-     * We:
-     *
-     * 1. Save the original URL.
-     * 2. Send the visitor to /momjourney/
-     * 3. The main app can then restore the saved URL.
-     *
-     * =========================================================
-     */
+    (function () {
+      var BASE_PATH = "/momjourney/";
 
-    const BASE_PATH = "/momjourney/";
+      var requestedPath =
+        location.pathname +
+        location.search +
+        location.hash;
 
-    /*
-     * Build the exact URL the visitor originally requested.
-     */
-    const originalPath =
-      window.location.pathname +
-      window.location.search +
-      window.location.hash;
+      sessionStorage.setItem(
+        "momjourney-redirect",
+        requestedPath
+      );
 
-    /*
-     * Store it temporarily.
-     */
-    sessionStorage.setItem(
-      "momjourney-redirect",
-      originalPath
-    );
-
-    /*
-     * Build the base URL using the current domain.
-     *
-     * Example:
-     *
-     * https://drk.qzz.io/momjourney/
-     */
-    const baseURL =
-      window.location.origin + BASE_PATH;
-
-    /*
-     * Prevent a pointless redirect if somehow the 404 page
-     * is already being served at the base path.
-     */
-    if (window.location.pathname !== BASE_PATH) {
-      window.location.replace(baseURL);
-    }
+      location.replace(
+        location.origin + BASE_PATH
+      );
+    })();
   </script>
 </head>
 
 <body>
-
   <div class="loading">
-
-    <div class="flower">
-      🌷
-    </div>
-
+    <div class="flower">🌷</div>
     <div class="text">
       Taking you to Mom's little journey…
     </div>
-
   </div>
-
 </body>
 </html>
