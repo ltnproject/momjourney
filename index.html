@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mom's Little Journey</title>
+<meta name="description" content="A little Mother's Day scavenger hunt, made with love.">
+<meta name="robots" content="noindex">
+
+<!-- ============================================================
+     GITHUB-PAGES-STYLE DEEP LINK REDIRECT
+     If a visitor lands on /mom/5 directly and the host has no
+     server-side routing, 404.html (included in this project)
+     bounces them back here with the path preserved. This script
+     restores that path so the app opens on the right step.
+     ============================================================ -->
+<script>
+  (function () {
+    var redirect = sessionStorage.getItem('momjourney-redirect');
+    if (redirect) {
+      sessionStorage.removeItem('momjourney-redirect');
+      if (redirect !== location.pathname + location.search + location.hash) {
+        history.replaceState(null, '', redirect);
+      }
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     DESIGN TOKENS
+     Palette: cream page, blush + rose accents, soft gold trim.
+     Display type: Cormorant Garamond (warm, handwritten-adjacent
+     serif — feels like a letter, not a corporate template).
+     Body type: Jost (light, airy, quietly modern).
+     ========================================================= */
+  :root{
+    --cream:        #FBF5EE;
+    --cream-deep:   #F3E9DC;
+    --blush:        #F4D9DE;
+    --rose:         #D98A9D;
+    --rose-deep:    #B65C74;
+    --gold:         #C9A24B;
+    --gold-soft:    #E4CE9A;
+    --ink:          #4A3B36;
+    --ink-soft:     #8A7468;
+    --white:        #FFFDFB;
+
+    --display: 'Cormorant Garamond', Georgia, serif;
+    --body: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    --shadow: 0 20px 50px -20px rgba(182, 92, 116, 0.35);
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    font-family: var(--body);
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse at 20% -10%, var(--blush) 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 10%, var(--gold-soft) 0%, transparent 45%),
+      var(--cream);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a{ color: inherit; }
+
+  /* ---------- layout shell ---------- */
+  #app{
+    min-height: 100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding: 32px 20px 56px;
+    position: relative;
+  }
+
+  .card{
+    width: 100%;
+    max-width: 460px;
+    background: var(--white);
+    border-radius: 28px;
+    padding: 44px 30px 36px;
+    box-shadow: var(--shadow);
+    position: relative;
+    text-align: center;
+    border: 1px solid rgba(201,162,75,0.18);
+  }
+
+  /* subtle corner flourish, reused across cards */
+  .card::before{
+    content:"";
+    position:absolute;
+    inset: 10px;
+    border: 1px solid rgba(201,162,75,0.25);
+    border-radius: 20px;
+    pointer-events: none;
+  }
+
+  /* ---------- signature element: the growing garland ----------
+     A single stem grows across the whole journey; each step
+     that Mom reaches adds one more bloom to it. Doubles as the
+     progress indicator so "3 / 10" is felt, not just read. */
+  .garland{
+    width: 100%;
+    max-width: 320px;
+    height: 34px;
+    margin: 0 auto 18px;
+    overflow: visible;
+  }
+  .garland-stem{
+    stroke: var(--gold);
+    stroke-width: 1.4;
+    fill: none;
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    animation: draw-stem 1.4s ease forwards 0.15s;
+  }
+  .garland-bloom{
+    opacity: 0;
+    transform-origin: center;
+    animation: pop-bloom 0.5s ease forwards;
+  }
+  @keyframes draw-stem{ to{ stroke-dashoffset: 0; } }
+  @keyframes pop-bloom{
+    0%{ opacity:0; transform: scale(0.2); }
+    70%{ opacity:1; transform: scale(1.15); }
+    100%{ opacity:1; transform: scale(1); }
+  }
+
+  .progress-label{
+    font-family: var(--body);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 26px;
+  }
+  .progress-label strong{ color: var(--rose-deep); font-weight: 600; }
+
+  .eyebrow{
+    font-family: var(--body);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rose-deep);
+    margin: 0 0 10px;
+  }
+
+  h1.title{
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(28px, 8vw, 38px);
+    line-height: 1.15;
+    margin: 0 0 18px;
+    color: var(--ink);
+  }
+
+  .message{
+    font-family: var(--display);
+    font-size: 20px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0 0 26px;
+    white-space: pre-line;
+  }
+
+  .clue-box{
+    background: linear-gradient(180deg, var(--blush) 0%, var(--cream-deep) 100%);
+    border-radius: 18px;
+    padding: 20px 22px;
+    margin: 0 0 8px;
+    position: relative;
+  }
+  .clue-label{
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rose-deep);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .clue-text{
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  .sparkle{
+    position:absolute;
+    font-size: 16px;
+    opacity: 0.85;
+    animation: twinkle 2.4s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes twinkle{
+    0%,100%{ opacity:0.25; transform: scale(0.85) rotate(0deg); }
+    50%{ opacity:1; transform: scale(1.05) rotate(8deg); }
+  }
+
+  .petal{
+    position: fixed;
+    top: -10%;
+    font-size: 18px;
+    opacity: 0.8;
+    pointer-events: none;
+    animation: fall linear forwards;
+    z-index: 0;
+  }
+  @keyframes fall{
+    to{ transform: translateY(115vh) rotate(360deg); opacity: 0.2; }
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    width:100%;
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    background: linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%);
+    border: none;
+    border-radius: 999px;
+    padding: 16px 24px;
+    margin-top: 18px;
+    cursor: pointer;
+    text-decoration:none;
+    box-shadow: 0 12px 24px -10px rgba(182,92,116,0.55);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn:hover{ transform: translateY(-2px); box-shadow: 0 16px 30px -10px rgba(182,92,116,0.6); }
+  .btn:active{ transform: translateY(0); }
+  .btn:focus-visible{ outline: 3px solid var(--gold); outline-offset: 3px; }
+
+  .btn-ghost{
+    background: none;
+    color: var(--rose-deep);
+    border: 1.5px solid var(--rose);
+    box-shadow: none;
+  }
+  .btn-ghost:hover{ background: var(--blush); box-shadow:none; }
+
+  .btn-gold{
+    background: linear-gradient(135deg, var(--gold-soft) 0%, var(--gold) 100%);
+    color: var(--ink);
+    box-shadow: 0 12px 24px -10px rgba(201,162,75,0.55);
+  }
+
+  .hint{
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .footer-note{
+    margin-top: 28px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+
+  /* ---------- homepage specific ---------- */
+  .home-flowers{
+    font-size: 34px;
+    margin-bottom: 6px;
+    letter-spacing: 6px;
+  }
+  .home-sub{
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--ink-soft);
+    margin: 0 0 30px;
+  }
+
+  /* ---------- final page ---------- */
+  .final-heart{
+    font-size: 46px;
+    animation: heartbeat 1.8s ease-in-out infinite;
+  }
+  @keyframes heartbeat{
+    0%,100%{ transform: scale(1); }
+    15%{ transform: scale(1.12); }
+    30%{ transform: scale(1); }
+    45%{ transform: scale(1.08); }
+  }
+  .signature{
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 22px;
+    margin-top: 4px;
+    color: var(--rose-deep);
+  }
+
+  /* ---------- 404 ---------- */
+  .missing-icon{ font-size: 40px; margin-bottom: 8px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    .petal{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app" role="main"></div>
+
+<script>
+/* =====================================================================
+   ⭐ EDIT ME — JOURNEY CONTENT
+   Everything Mom will see lives in this one object. Change names,
+   messages, and locations here; nothing else needs to change.
+   =====================================================================
+*/
+const JOURNEY = {
+
+  // 1. Mom's name — used on the homepage and final page.
+  momName: "Mom",
+
+  // 2. Your name — signs the final message.
+  yourName: "Jacob",
+
+  // Homepage copy.
+  home: {
+    kicker: "🌷",
+    title: "Mom's Little Journey",
+    subtitle: "A little adventure made just for you.",
+    instruction: "Scan the first QR code to begin.",
+    buttonLabel: "Start the Journey ❤️"
+  },
+
+  // 5. Final surprise — point this at a photo gallery, video, or
+  // another page whenever you're ready. Leave as "#" to hide/disable.
+  finalSurpriseUrl: "#",
+
+  // 3 & 4. Messages and locations — one entry per QR code / step.
+  // `location` is shown as "Next, find it at: ___" and should NOT
+  // reveal anything from a later step.
+  steps: [
+    {
+      id: 1,
+      title: "The Journey Begins",
+      message: "Happy Mother's Day, Mom ❤️\nToday isn't just about giving you a gift.\nI wanted to make you a little journey around our home.",
+      location: "The Mirror"
+    },
+    {
+      id: 2,
+      title: "Look Closer",
+      message: "Every time I see you in the mirror, I see someone beautiful, someone strong, and someone truly amazing. I hope you see her too.",
+      location: "The Refrigerator"
+    },
+    {
+      id: 3,
+      title: "A Simple Wish",
+      message: "Wherever this year takes you, I hope it's full of happiness and good health. You deserve nothing less.",
+      location: "Her Bed / Pillow"
+    },
+    {
+      id: 4,
+      title: "Always There",
+      message: "Through every late night, every hard day, every small victory — you were there. Thank you for never leaving my side.",
+      location: "Her Bag / Handbag"
+    },
+    {
+      id: 5,
+      title: "The Little Things",
+      message: "So many little things you do go unnoticed, and I don't say thank you enough for them. I see them now, and I'm grateful for every one.",
+      location: "The Sofa / Living Room"
+    },
+    {
+      id: 6,
+      title: "Full House, Full Heart",
+      message: "Some of my favorite memories are the simplest ones — just us, together, in this house. Thank you for filling it with warmth.",
+      location: "The Kitchen"
+    },
+    {
+      id: 7,
+      title: "For You, Too",
+      message: "You spend so much time taking care of everyone else. I hope you give yourself a little more time to rest and enjoy life, too.",
+      location: "My Camera / Instax Area"
+    },
+    {
+      id: 8,
+      title: "More To Come",
+      message: "Let's make more memories together — more photos, more moments, more little adventures like this one.",
+      location: "A Family Photo"
+    },
+    {
+      id: 9,
+      title: "Lucky Me",
+      message: "Out of everyone in the world, I'm the lucky one who gets to call you Mom. I don't take that for granted.",
+      location: "The Final Stop"
+    },
+    {
+      id: 10,
+      title: "❤️ You Made It ❤️",
+      message: "You found every little message.\n\nThe real gift isn't hidden somewhere in this house.\n\nIt's all the memories we've made, all the things you've taught me, and all the love you've given me.\n\nThank you for being my mom.\n\nHappy Mother's Day, Mom. 🌷",
+      location: null,
+      isFinal: true
+    }
+  ]
+};
+
+/* =====================================================================
+   ROUTER — plain static, no framework, no backend.
+   Reads /mom/N from the path (or #/mom/N as a hash fallback for
+   hosts that can't rewrite paths at all).
+   =====================================================================
+*/
+function getRoute(){
+  const path = location.pathname.replace(/\/+$/,'');
+  let match = path.match(/\/mom\/(\d+)$/);
+  if (match) return { type: 'step', n: parseInt(match[1], 10) };
+
+  const hash = location.hash.match(/#\/?mom\/(\d+)$/);
+  if (hash) return { type: 'step', n: parseInt(hash[1], 10) };
+
+  if (path === '' || path === '/' || path.endsWith('/index.html')) {
+    return { type: 'home' };
+  }
+  return { type: 'notfound' };
+}
+
+function stepUrl(n){
+  // Prefer clean path URLs; QR codes should point to e.g. /mom/3
+  return `/mom/${n}`;
+}
+
+/* ---------- small helpers ---------- */
+function el(html){
+  const t = document.createElement('template');
+  t.innerHTML = html.trim();
+  return t.content.firstElementChild;
+}
+
+function sprinklePetals(container, count){
+  const petals = ['🌸','✨','💮'];
+  for (let i=0;i<count;i++){
+    const p = document.createElement('span');
+    p.className = 'petal';
+    p.textContent = petals[Math.floor(Math.random()*petals.length)];
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.animationDuration = (6 + Math.random()*5) + 's';
+    p.style.animationDelay = (Math.random()*4) + 's';
+    p.style.fontSize = (14 + Math.random()*10) + 'px';
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 12000);
+  }
+}
+
+function garlandSVG(current, total){
+  const w = 320, pad = 20, usable = w - pad*2;
+  let blooms = '';
+  for (let i=0;i<total;i++){
+    const x = pad + (usable/(total-1))*i;
+    const filled = i < current; // steps already reached
+    const delay = (0.9 + i*0.06).toFixed(2);
+    blooms += `<circle class="garland-bloom" cx="${x}" cy="17" r="${filled?5:3}"
+      fill="${filled ? 'var(--rose)' : 'var(--cream-deep)'}"
+      stroke="${filled ? 'var(--rose-deep)' : 'var(--gold-soft)'}" stroke-width="1"
+      style="animation-delay:${delay}s"></circle>`;
+  }
+  return `<svg class="garland" viewBox="0 0 ${w} 34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path class="garland-stem" d="M ${pad} 17 H ${w-pad}"></path>
+    ${blooms}
+  </svg>`;
+}
+
+/* ---------- page renderers ---------- */
+function renderHome(){
+  const h = JOURNEY.home;
+  document.title = "Mom's Little Journey";
+  return el(`
+    <div class="card">
+      <div class="sparkle" style="top:14px; left:24px;">✨</div>
+      <div class="sparkle" style="top:20px; right:26px; animation-delay:0.6s;">✨</div>
+      <div class="home-flowers">🌷 &nbsp; 🌷</div>
+      <h1 class="title">${h.title}</h1>
+      <p class="home-sub">${h.subtitle}</p>
+      <p class="message" style="font-size:16px; font-family:var(--body); color:var(--ink-soft); margin-bottom:8px;">
+        ${h.instruction}
+      </p>
+      <a class="btn" href="${stepUrl(1)}" data-link>${h.buttonLabel}</a>
+      <p class="footer-note">Made with love, just for you 🌷</p>
+    </div>
+  `);
+}
+
+function renderStep(n){
+  const step = JOURNEY.steps.find(s => s.id === n);
+  const total = JOURNEY.steps.length;
+  if (!step) return renderNotFound();
+
+  document.title = step.isFinal ? "You Made It ❤️" : `Step ${n} — Mom's Little Journey`;
+
+  if (step.isFinal){
+    sprinklePetals(document.body, 14);
+    const surpriseBtn = (JOURNEY.finalSurpriseUrl && JOURNEY.finalSurpriseUrl !== '#')
+      ? `<a class="btn btn-gold" href="${JOURNEY.finalSurpriseUrl}" target="_blank" rel="noopener">🎁 One Last Surprise</a>`
+      : `<a class="btn btn-gold" href="#" onclick="return false;" aria-disabled="true" style="opacity:0.6; cursor:default;">🎁 One Last Surprise</a>`;
+
+    return el(`
+      <div class="card">
+        ${garlandSVG(total, total)}
+        <div class="progress-label">${total} / ${total} &nbsp;·&nbsp; Journey Complete</div>
+        <div class="final-heart">❤️</div>
+        <h1 class="title" style="margin-top:6px;">You Made It</h1>
+        <p class="message">${step.message}</p>
+        <p class="signature">Love,<br>${JOURNEY.yourName} ❤️</p>
+        ${surpriseBtn}
+      </div>
+    `);
+  }
+
+  return el(`
+    <div class="card">
+      ${garlandSVG(n, total)}
+      <div class="progress-label"><strong>${n}</strong> / ${total}</div>
+      <div class="eyebrow">For ${JOURNEY.momName}</div>
+      <h1 class="title">${step.title}</h1>
+      <p class="message">${step.message}</p>
+      <div class="clue-box">
+        <div class="clue-label">Next, find it at</div>
+        <div class="clue-text">${step.location}</div>
+      </div>
+      <p class="hint">Look for the next little QR code there 🌸</p>
+    </div>
+  `);
+}
+
+function renderNotFound(){
+  document.title = "Hmm... — Mom's Little Journey";
+  return el(`
+    <div class="card">
+      <div class="missing-icon">🌱</div>
+      <h1 class="title">This QR wandered off</h1>
+      <p class="message" style="font-size:16px; font-family:var(--body); color:var(--ink-soft);">
+        This link doesn't match any step of the journey. Double-check the code, or start from the beginning.
+      </p>
+      <a class="btn btn-ghost" href="/" data-link>← Back to the Start</a>
+    </div>
+  `);
+}
+
+/* ---------- app mount ---------- */
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  document.querySelectorAll('.petal').forEach(p => p.remove());
+
+  const route = getRoute();
+  let node;
+  if (route.type === 'home') node = renderHome();
+  else if (route.type === 'step') node = renderStep(route.n);
+  else node = renderNotFound();
+
+  app.appendChild(node);
+}
+
+// Intercept in-app links so we don't force a full reload where avoidable.
+document.addEventListener('click', function(e){
+  const a = e.target.closest('a[data-link]');
+  if (!a) return;
+  const url = new URL(a.href);
+  if (url.origin !== location.origin) return;
+  e.preventDefault();
+  history.pushState(null, '', url.pathname + url.hash);
+  render();
+});
+
+window.addEventListener('popstate', render);
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/mom/:num", "destination": "/index.html" },
+    { "source": "/", "destination": "/index.html" }
+  ]
+}
