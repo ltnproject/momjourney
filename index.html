@@ -15,15 +15,22 @@
      restores that path so the app opens on the right step.
      ============================================================ -->
 <script>
-  (function () {
-    var redirect = sessionStorage.getItem('momjourney-redirect');
-    if (redirect) {
-      sessionStorage.removeItem('momjourney-redirect');
-      if (redirect !== location.pathname + location.search + location.hash) {
-        history.replaceState(null, '', redirect);
-      }
-    }
-  })();
+     (function () {
+  var redirect =
+    sessionStorage.getItem("momjourney-redirect");
+
+  if (!redirect) return;
+
+  sessionStorage.removeItem(
+    "momjourney-redirect"
+  );
+
+  history.replaceState(
+    null,
+    "",
+    redirect
+  );
+})();
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -442,8 +449,7 @@ function getRoute(){
 }
 
 function stepUrl(n){
-  // Prefer clean path URLs; QR codes should point to e.g. /mom/3
-  return `/mom/${n}`;
+  return `/momjourney/mom/${n}`;
 }
 
 /* ---------- small helpers ---------- */
